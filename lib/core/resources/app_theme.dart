@@ -4,6 +4,36 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   static ThemeData lightTheme= ThemeData(
+    switchTheme: SwitchThemeData(
+        padding: EdgeInsets.zero,
+        trackOutlineColor: WidgetStateColor.resolveWith((states) {
+          return ColorsManager.unselectedTab;
+        },),
+        trackColor: WidgetStateColor.resolveWith((states) {
+        return ColorsManager.unselectedTab;
+      },),
+      thumbColor: WidgetStateColor.resolveWith((states) {
+        return ColorsManager.onPrimaryColor;
+      },)
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: Colors.white,
+      indicatorColor: Colors.transparent,
+      labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
+        if(states.contains(WidgetState.selected)){
+          return TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+            color: ColorsManager.primaryColor
+          );
+        }
+        return TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: ColorsManager.unselectedTab
+        );
+      },)
+    ),
     appBarTheme: AppBarThemeData(
       centerTitle: true,
       backgroundColor: Colors.transparent,
@@ -69,6 +99,34 @@ class AppTheme {
     )
   );
   static ThemeData darkTheme= ThemeData(
+      switchTheme: SwitchThemeData(
+          padding: EdgeInsets.zero,
+          trackColor: WidgetStateColor.resolveWith((states) {
+            return ColorsManager.darkPrimaryColor;
+          },),
+          thumbColor: WidgetStateColor.resolveWith((states) {
+            return ColorsManager.onPrimaryColor;
+          },)
+      ),
+
+      navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: ColorsManager.darkBackgroundColor,
+          indicatorColor: Colors.transparent,
+          labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
+            if(states.contains(WidgetState.selected)){
+              return TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: ColorsManager.darkPrimaryColor
+              );
+            }
+            return TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+                color: ColorsManager.unselectedTab
+            );
+          },)
+      ),
     scaffoldBackgroundColor: ColorsManager.darkBackgroundColor,
     appBarTheme: AppBarThemeData(
       centerTitle: true,

@@ -10,12 +10,16 @@ class CustomField extends StatefulWidget {
   TextEditingController controller;
   bool isObscure;
   String? Function(String?) validation;
+  Widget? suffix;
+  int maxLines;
   CustomField({
     required this.validation,
+    this.maxLines = 1,
     this.isObscure = false,
     required this.controller,
     required this.hint,
-    required this.prefixPath,
+    this.prefixPath = "",
+    this.suffix,
     required this.keyboard,
   });
 
@@ -28,6 +32,7 @@ class _CustomFieldState extends State<CustomField> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      maxLines: widget.maxLines,
       validator: widget.validation,
       obscureText: widget.isObscure
           ?!isVisible
@@ -46,11 +51,11 @@ class _CustomFieldState extends State<CustomField> {
             isVisible = !isVisible;
           });
         }, icon: SvgPicture.asset(isVisible?AssetsManager.visibleOn:AssetsManager.visibleOff,height: 24,width: 24,))
-        :null,
-        prefixIcon: Padding(
+        :widget.suffix,
+        prefixIcon: widget.prefixPath.isNotEmpty?Padding(
           padding: const EdgeInsets.only(left: 16, top: 12, bottom: 12),
           child: SvgPicture.asset(widget.prefixPath),
-        ),
+        ):null,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(

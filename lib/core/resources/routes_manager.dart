@@ -4,4 +4,5 @@ abstract class RoutesManager {
   static const String homeRouteName = "home";
   static const String signupRouteName = "signup";
   static const String forgetpassRouteName = "forgetpass";
+  static const String addEventRouteName = "add_event";
 }

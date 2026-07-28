@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/resources/app_constants.dart';
@@ -20,6 +21,7 @@ class _SignupScreenState extends State<SignupScreen> {
   late TextEditingController passwordController;
   late TextEditingController confirmPassController;
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     // TODO: implement initState
@@ -38,6 +40,7 @@ class _SignupScreenState extends State<SignupScreen> {
     confirmPassController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,22 +131,30 @@ class _SignupScreenState extends State<SignupScreen> {
                 SizedBox(height: 48),
                 Container(
                   width: double.infinity,
-                  child: CustomBtn(title: StringsManager.signup, onClick: () {
-                    if(formKey.currentState?.validate()??false){
-                      Navigator.pushReplacementNamed(context, RoutesManager.homeRouteName);
-                    }
-                  }),
+                  child: CustomBtn(
+                    title: StringsManager.signup,
+                    onClick: () {
+                      if (formKey.currentState?.validate() ?? false) {
+                      }
+                    },
+                  ),
                 ),
                 SizedBox(height: 48),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("${StringsManager.alreadyHaveAcc} ",style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.w600
-                    ),),
+                    Text(
+                      "${StringsManager.alreadyHaveAcc} ",
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     InkWell(
                       onTap: () {
-                        Navigator.pushReplacementNamed(context, RoutesManager.loginRouteName);
+                        Navigator.pushReplacementNamed(
+                          context,
+                          RoutesManager.loginRouteName,
+                        );
                       },
                       child: Text(
                         StringsManager.login,
@@ -159,4 +170,5 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
     );
   }
+
 }

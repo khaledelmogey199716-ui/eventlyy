@@ -3,6 +3,7 @@ import 'package:evently_c19/core/resources/app_theme.dart';
 import 'package:evently_c19/core/resources/colors_manager.dart';
 import 'package:evently_c19/core/resources/routes_manager.dart';
 import 'package:evently_c19/providers/theme_provider.dart';
+import 'package:evently_c19/ui/add_event/screen/add_event_screen.dart';
 import 'package:evently_c19/ui/forget_pass/screen/forget_pass_screen.dart';
 import 'package:evently_c19/ui/home/screen/home_screen.dart';
 import 'package:evently_c19/ui/login/screen/login_screen.dart';
@@ -10,9 +11,13 @@ import 'package:evently_c19/ui/signup/screen/signup_screen.dart';
 import 'package:evently_c19/ui/start/screen/start_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await PrefsManager.init();
   runApp(ChangeNotifierProvider(
       create: (context) => ThemeProvider()..init(),
@@ -37,8 +42,9 @@ class MyApp extends StatelessWidget {
         RoutesManager.homeRouteName:(_)=>HomeScreen(),
         RoutesManager.signupRouteName:(_)=>SignupScreen(),
         RoutesManager.forgetpassRouteName:(_)=>ForgetPassScreen(),
+        RoutesManager.addEventRouteName:(_)=>AddEventScreen(),
       },
-      initialRoute: RoutesManager.loginRouteName,
+      initialRoute: RoutesManager.homeRouteName,
     );
   }
 }

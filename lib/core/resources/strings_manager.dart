@@ -23,4 +23,8 @@ abstract class StringsManager {
   static const String passwordsMatch = "Passwords don't match";
   static const String resetPass = "Reset password";
   static const String forgetPass = "Forget Password";
+  static const String home = "Home";
+  static const String favorite = "Favorite";
+  static const String profile = "Profile";
+  static const String welcomeBack = "Welcome Back ✨";
 }
