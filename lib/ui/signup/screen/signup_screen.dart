@@ -1,4 +1,7 @@
+import 'package:evently_c19/core/remote/network/firestore_manager.dart';
+import 'package:evently_c19/core/resources/dialog_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:evently_c19/model/user.dart' as userModel;
 import 'package:flutter/material.dart';
 
 import '../../../core/resources/app_constants.dart';
@@ -135,6 +138,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     title: StringsManager.signup,
                     onClick: () {
                       if (formKey.currentState?.validate() ?? false) {
+                        createNewAccount();
                       }
                     },
                   ),
@@ -171,4 +175,41 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
+  createNewAccount() async{
+    try{
+      DialogUtils.showLoadingDialog(context);
+      var credential  = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      ); // singleton
+      await FirestoreManager.saveUser(userModel.User(
+        id: FirebaseAuth.instance.currentUser!.uid,
+        email: emailController.text,
+        name: nameController.text,
+        favorites:  []
+      ));
+      Navigator.of(context).pop();
+      Navigator.pushReplacementNamed(context, RoutesManager.homeRouteName);
+      print(credential.user?.uid);
+    }on FirebaseAuthException catch(e){
+      Navigator.of(context).pop();
+      if (e.code == 'weak-password') {
+        DialogUtils.showMessageDialog(context: context,
+          content: "The password provided is too weak.",
+          actionTitle: "Ok",
+          actionPress: () {
+            Navigator.of(context).pop();
+          },);
+      } else if (e.code == 'email-already-in-use') {
+        DialogUtils.showMessageDialog(context: context,
+          content: "The account already exists for that email.",
+          actionTitle: "Ok",
+          actionPress: () {
+            Navigator.of(context).pop();
+          },);
+      }
+    }catch(e){
+      print("exeption: $e");
+    }
+  }
 }

@@ -1,7 +1,11 @@
 import 'package:evently_c19/core/resources/assets_manager.dart';
+import 'package:evently_c19/core/resources/dialog_utils.dart';
+import 'package:evently_c19/core/resources/routes_manager.dart';
 import 'package:evently_c19/core/resources/strings_manager.dart';
 import 'package:evently_c19/providers/theme_provider.dart';
+import 'package:evently_c19/providers/user_provider.dart';
 import 'package:evently_c19/ui/home/tabs/profile/widgets/settings_btn.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -22,14 +26,21 @@ class ProfileTab extends StatelessWidget {
               backgroundImage: AssetImage(AssetsManager.route),
             ),
             SizedBox(height: 16,),
-            Text("John Safwat", style: Theme
-                .of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(
-                fontWeight: FontWeight.w600, fontSize: 20
-            ),),
-            Text("johnsafwat.route@gmail.com", style: Theme
+            Consumer<UserProvider>(
+                builder: (context, userProvider, child) {
+                  if(userProvider.user==null){
+                    return Center(child: CircularProgressIndicator(),);
+                  }
+                  return Text(userProvider.user?.name??"", style: Theme
+                      .of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(
+                      fontWeight: FontWeight.w600, fontSize: 20
+                  ),);
+                },
+            ),
+            Text(FirebaseAuth.instance.currentUser!.email??"", style: Theme
                 .of(context)
                 .textTheme
                 .bodyMedium
@@ -59,8 +70,22 @@ class ProfileTab extends StatelessWidget {
                     },
                     action: SvgPicture.asset(AssetsManager.arrowRight)),
                 SettingsBtn(title: "Logout",
-                    onClick: () {
-
+                    onClick: () async{
+                      try{
+                        DialogUtils.showLoadingDialog(context);
+                        await FirebaseAuth.instance.signOut();
+                        Navigator.of(context).pop();
+                        Navigator.pushReplacementNamed(context, RoutesManager.loginRouteName);
+                      }catch(e){
+                        Navigator.of(context).pop();
+                        DialogUtils.showMessageDialog(context: context,
+                            content: e.toString(),
+                            actionTitle: "Ok",
+                            actionPress: () {
+                              Navigator.of(context).pop();
+                            },
+                        );
+                      }
                     },
                     action: SvgPicture.asset(AssetsManager.logout)),
               ],)

@@ -1,7 +1,9 @@
 import 'package:evently_c19/core/resources/app_constants.dart';
+import 'package:evently_c19/core/resources/dialog_utils.dart';
 import 'package:evently_c19/core/resources/routes_manager.dart';
 import 'package:evently_c19/core/resources/strings_manager.dart';
 import 'package:evently_c19/core/reusable_components/custom_btn.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/resources/assets_manager.dart';
@@ -18,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController emailController;
   late TextEditingController passwordController;
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     // TODO: implement initState
@@ -41,7 +44,10 @@ class _LoginScreenState extends State<LoginScreen> {
           AssetsManager.logo,
           height: 27,
           fit: BoxFit.fitHeight,
-          color: Theme.of(context).colorScheme.primary,
+          color: Theme
+              .of(context)
+              .colorScheme
+              .primary,
         ),
       ),
       body: Padding(
@@ -54,7 +60,11 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 Text(
                   StringsManager.loginToYourAccount,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(
                     fontSize: 24,
                     fontWeight: FontWeight.w600,
                   ),
@@ -97,37 +107,59 @@ class _LoginScreenState extends State<LoginScreen> {
                   alignment: Alignment.centerRight,
                   child: InkWell(
                     onTap: () {
-                      Navigator.pushNamed(context, RoutesManager.forgetpassRouteName);
+                      Navigator.pushNamed(
+                        context,
+                        RoutesManager.forgetpassRouteName,
+                      );
                     },
                     child: Text(
                       StringsManager.forgetPassAsk,
-                      style: Theme.of(context).textTheme.headlineMedium,
+                      style: Theme
+                          .of(context)
+                          .textTheme
+                          .headlineMedium,
                     ),
                   ),
                 ),
                 SizedBox(height: 48),
                 Container(
                   width: double.infinity,
-                  child: CustomBtn(title: StringsManager.login, onClick: () {
-                    if(formKey.currentState?.validate()??false){
-                      Navigator.pushReplacementNamed(context, RoutesManager.homeRouteName);
-                    }
-                  }),
+                  child: CustomBtn(
+                    title: StringsManager.login,
+                    onClick: () {
+                      if (formKey.currentState?.validate() ?? false) {
+                        login();
+                      }
+                    },
+                  ),
                 ),
                 SizedBox(height: 48),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("${StringsManager.dontHaveAcc} ",style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w600
-                    ),),
+                    Text(
+                      "${StringsManager.dontHaveAcc} ",
+                      style: Theme
+                          .of(context)
+                          .textTheme
+                          .labelSmall
+                          ?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     InkWell(
                       onTap: () {
-                        Navigator.pushReplacementNamed(context, RoutesManager.signupRouteName);
+                        Navigator.pushReplacementNamed(
+                          context,
+                          RoutesManager.signupRouteName,
+                        );
                       },
                       child: Text(
                         StringsManager.signup,
-                        style: Theme.of(context).textTheme.headlineMedium,
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .headlineMedium,
                       ),
                     ),
                   ],
@@ -138,5 +170,37 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  login() async {
+    try {
+      DialogUtils.showLoadingDialog(context);
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+      Navigator.of(context).pop();
+      Navigator.pushReplacementNamed(context, RoutesManager.homeRouteName);
+      print(credential.user?.uid);
+    } on FirebaseAuthException catch (e) {
+      Navigator.of(context).pop();
+      if (e.code == 'user-not-found') {
+        DialogUtils.showMessageDialog(context: context,
+            content: "No user found for that email.",
+            actionTitle: "Ok",
+            actionPress: () {
+              Navigator.of(context).pop();
+            },);
+      } else if (e.code == 'wrong-password') {
+        DialogUtils.showMessageDialog(context: context,
+          content: "Wrong password provided for that user.",
+          actionTitle: "Ok",
+          actionPress: () {
+            Navigator.of(context).pop();
+          },);
+      }
+    } catch (e) {
+      print("sign in exception : $e");
+    }
   }
 }

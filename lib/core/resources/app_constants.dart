@@ -18,4 +18,6 @@ abstract class AppConstants {
     "exhibition":AssetsManager.exhibition_dark,
   };
 
+  static List<String> eventTypes = ["sport","birthday","book","exhibition","meeting"];
+
 }
