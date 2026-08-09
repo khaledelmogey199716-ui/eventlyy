@@ -1,6 +1,5 @@
 import 'package:evently_c19/core/remote/local/prefs_manager.dart';
 import 'package:evently_c19/core/resources/app_theme.dart';
-import 'package:evently_c19/core/resources/colors_manager.dart';
 import 'package:evently_c19/core/resources/routes_manager.dart';
 import 'package:evently_c19/providers/theme_provider.dart';
 import 'package:evently_c19/providers/user_provider.dart';
