@@ -7,11 +7,12 @@ import 'package:evently_c19/ui/add_event/screen/add_event_screen.dart';
 import 'package:evently_c19/ui/forget_pass/screen/forget_pass_screen.dart';
 import 'package:evently_c19/ui/home/screen/home_screen.dart';
 import 'package:evently_c19/ui/login/screen/login_screen.dart';
+import 'package:evently_c19/ui/onboarding/screen/onboarding_screen.dart';
 import 'package:evently_c19/ui/signup/screen/signup_screen.dart';
 import 'package:evently_c19/ui/start/screen/start_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 void main() async{
@@ -20,13 +21,30 @@ void main() async{
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await PrefsManager.init();
+
+  // await PrefsManager.resetOnboarding(); ///////// MAKE SURE TO REMOVE BEFORE RELEASE
+
+  String initialRoute;
+
+  if (!PrefsManager.isOnboardingCompleted) {
+    initialRoute = RoutesManager.onboardingRouteName;
+  } else if (FirebaseAuth.instance.currentUser != null) {
+    initialRoute = RoutesManager.homeRouteName;
+  } else {
+    initialRoute = RoutesManager.loginRouteName;
+  }
+
   runApp(ChangeNotifierProvider(
       create: (context) => ThemeProvider()..init(),
-      child: const MyApp()));
+      child: MyApp(initialRoute: initialRoute,)));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String initialRoute;
+
+  const MyApp({
+    required this.initialRoute,
+  });
 
   // This widget is the root of your application.
   @override
@@ -46,10 +64,12 @@ class MyApp extends StatelessWidget {
         RoutesManager.signupRouteName:(_)=>SignupScreen(),
         RoutesManager.forgetpassRouteName:(_)=>ForgetPassScreen(),
         RoutesManager.addEventRouteName:(_)=>AddEventScreen(),
+        RoutesManager.onboardingRouteName:(_)=>OnboardingScreen(),
       },
-      initialRoute: FirebaseAuth.instance.currentUser!=null
-          ?RoutesManager.homeRouteName
-          :RoutesManager.loginRouteName,
+      initialRoute: initialRoute
+      // FirebaseAuth.instance.currentUser!=null
+      //     ?RoutesManager.homeRouteName
+      //     :RoutesManager.loginRouteName,
     );
   }
 }
