@@ -23,4 +23,21 @@ class PrefsManager {
       return ThemeMode.light;
     }
   }
+
+
+  static const String _onboardingCompletedKey = 'onboarding_completed';
+
+  static Future<void> resetOnboarding() async {
+    await sharedPreferences.remove(_onboardingCompletedKey);
+  }
+
+
+  static bool get isOnboardingCompleted {
+    return sharedPreferences.getBool(_onboardingCompletedKey) ?? false;
+  }
+  static Future<void> setOnboardingCompleted() async {
+    await sharedPreferences.setBool(_onboardingCompletedKey, true);
+  }
+
+
 }

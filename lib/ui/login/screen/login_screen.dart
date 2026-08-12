@@ -164,6 +164,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
+                SizedBox(height: 32),
+                Row(spacing: 16,
+                children: [
+                  Expanded(child: Divider(color: Theme.of(context).colorScheme.onSecondary,)),
+                  Text(StringsManager.or,style: Theme
+                      .of(context)
+                      .textTheme
+                      .headlineMedium?.copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      decoration: TextDecoration.none),),
+                  Expanded(child: Divider(color: Theme.of(context).colorScheme.onSecondary,)),
+                ],),
+                Row(children: [
+
+                ],)
+
               ],
             ),
           ),
