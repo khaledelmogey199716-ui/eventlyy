@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -22,11 +23,13 @@ void main() async{
   );
   await PrefsManager.init();
 
+   // await PrefsManager.resetOnboarding(); ///////// MAKE SURE TO REMOVE BEFORE RELEASE
   // await PrefsManager.resetOnboarding(); ///////// MAKE SURE TO REMOVE BEFORE RELEASE
 
   String initialRoute;
 
   if (!PrefsManager.isOnboardingCompleted) {
+    initialRoute = RoutesManager.startRouteName;
     initialRoute = RoutesManager.onboardingRouteName;
   } else if (FirebaseAuth.instance.currentUser != null) {
     initialRoute = RoutesManager.homeRouteName;
