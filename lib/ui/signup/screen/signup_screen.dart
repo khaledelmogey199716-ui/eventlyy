@@ -167,6 +167,46 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ],
                 ),
+                SizedBox(height: 32),
+                Row(spacing: 16,
+                  children: [
+                    Expanded(child: Divider(color: Theme.of(context).colorScheme.onSecondary,)),
+                    Text(StringsManager.or,style: Theme
+                        .of(context)
+                        .textTheme
+                        .headlineMedium?.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        decoration: TextDecoration.none),),
+                    Expanded(child: Divider(color: Theme.of(context).colorScheme.onSecondary,)),
+                  ],),
+                SizedBox(height: 24),
+                InkWell(
+                  onTap:() {
+
+                  } ,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 11),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Theme.of(context).colorScheme.onPrimaryContainer),
+                        color: Theme.of(context).colorScheme.onPrimary
+                    ),
+                    child: Row(
+                      spacing: 16,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(AssetsManager.google,width: 24,height: 24,fit: BoxFit.fill,),
+                        Text(StringsManager.signupWithGoogle, style: Theme
+                            .of(context)
+                            .textTheme
+                            .headlineMedium?.copyWith(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            decoration: TextDecoration.none),)
+                      ],),
+                  ),
+                )
               ],
             ),
           ),
