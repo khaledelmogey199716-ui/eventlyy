@@ -215,7 +215,7 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  createNewAccount() async{
+  Future<void> createNewAccount() async{
     try{
       DialogUtils.showLoadingDialog(context);
       var credential  = await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -249,7 +249,13 @@ class _SignupScreenState extends State<SignupScreen> {
           },);
       }
     }catch(e){
-      print("exeption: $e");
+      DialogUtils.showMessageDialog(context: context,
+        content: "exception: $e",
+        actionTitle: "Ok",
+        actionPress: () {
+          Navigator.of(context).pop();
+        },);
+
     }
   }
 }

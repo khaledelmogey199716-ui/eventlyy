@@ -23,6 +23,7 @@ class DialogUtils {
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
+            spacing: 10,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
             Text("Loading..."),

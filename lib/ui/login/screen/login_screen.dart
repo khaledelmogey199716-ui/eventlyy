@@ -212,7 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  login() async {
+  Future<void> login() async {
     try {
       DialogUtils.showLoadingDialog(context);
       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -240,7 +240,12 @@ class _LoginScreenState extends State<LoginScreen> {
           },);
       }
     } catch (e) {
-      print("sign in exception : $e");
+      DialogUtils.showMessageDialog(context: context,
+        content: "sign in exception : $e",
+        actionTitle: "Ok",
+        actionPress: () {
+          Navigator.of(context).pop();
+        },);
     }
   }
 }

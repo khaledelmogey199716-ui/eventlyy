@@ -1,6 +1,7 @@
 import 'package:evently_c19/core/resources/app_theme.dart';
 import 'package:evently_c19/core/resources/assets_manager.dart';
 import 'package:evently_c19/core/resources/colors_manager.dart';
+import 'package:evently_c19/core/resources/routes_manager.dart';
 import 'package:evently_c19/core/resources/strings_manager.dart';
 import 'package:evently_c19/core/reusable_components/custom_btn.dart';
 import 'package:evently_c19/providers/theme_provider.dart';
@@ -60,7 +61,9 @@ class StartScreen extends StatelessWidget {
             SizedBox(height: 24,),
             Container(
                 width: double.infinity,
-                child: CustomBtn(title: StringsManager.letsStart, onClick: (){}))
+                child: CustomBtn(title: StringsManager.letsStart, onClick: (){
+                  Navigator.of(context).pushNamed(RoutesManager.onboardingRouteName);
+                }))
           ],
         ),
       )
