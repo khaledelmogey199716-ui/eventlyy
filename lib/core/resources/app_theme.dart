@@ -49,9 +49,10 @@ class AppTheme {
       secondary: ColorsManager.secondaryColor,
       tertiary: ColorsManager.teritaryColor,
       onPrimary: ColorsManager.onPrimaryColor,
-        onSecondary: ColorsManager.fieldBorder,
+      onSecondary: ColorsManager.fieldBorder,
       onTertiary: ColorsManager.primaryColor,
-      onPrimaryContainer: ColorsManager.fieldBorder
+      onPrimaryContainer: ColorsManager.fieldBorder,
+      secondaryContainer: ColorsManager.unselectedTab
     ),
     textTheme: TextTheme(
       titleMedium: TextStyle(
@@ -188,7 +189,8 @@ class AppTheme {
       onPrimary: ColorsManager.darkUnselected,
       onSecondary: ColorsManager.fieldBorderDark,
       onTertiary: ColorsManager.onPrimaryColor,
-        onPrimaryContainer: ColorsManager.fieldBorderDark
+      onPrimaryContainer: ColorsManager.fieldBorderDark,
+      secondaryContainer: ColorsManager.backgroundColor,
 
 
     )

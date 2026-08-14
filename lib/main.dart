@@ -24,11 +24,13 @@ void main() async{
   await PrefsManager.init();
 
    // await PrefsManager.resetOnboarding(); ///////// MAKE SURE TO REMOVE BEFORE RELEASE
+  // await PrefsManager.resetOnboarding(); ///////// MAKE SURE TO REMOVE BEFORE RELEASE
 
   String initialRoute;
 
   if (!PrefsManager.isOnboardingCompleted) {
     initialRoute = RoutesManager.startRouteName;
+    initialRoute = RoutesManager.onboardingRouteName;
   } else if (FirebaseAuth.instance.currentUser != null) {
     initialRoute = RoutesManager.homeRouteName;
   } else {
@@ -68,6 +70,9 @@ class MyApp extends StatelessWidget {
         RoutesManager.onboardingRouteName:(_)=>OnboardingScreen(),
       },
       initialRoute: initialRoute
+      // FirebaseAuth.instance.currentUser!=null
+      //     ?RoutesManager.homeRouteName
+      //     :RoutesManager.loginRouteName,
     );
   }
 }
