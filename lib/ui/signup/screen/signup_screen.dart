@@ -10,6 +10,7 @@ import '../../../core/resources/routes_manager.dart';
 import '../../../core/resources/strings_manager.dart';
 import '../../../core/reusable_components/custom_btn.dart';
 import '../../../core/reusable_components/custom_field.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -168,45 +169,67 @@ class _SignupScreenState extends State<SignupScreen> {
                   ],
                 ),
                 SizedBox(height: 32),
-                Row(spacing: 16,
+                Row(
+                  spacing: 16,
                   children: [
-                    Expanded(child: Divider(color: Theme.of(context).colorScheme.onSecondary,)),
-                    Text(StringsManager.or,style: Theme
-                        .of(context)
-                        .textTheme
-                        .headlineMedium?.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        decoration: TextDecoration.none),),
-                    Expanded(child: Divider(color: Theme.of(context).colorScheme.onSecondary,)),
-                  ],),
+                    Expanded(
+                      child: Divider(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                      ),
+                    ),
+                    Text(
+                      StringsManager.or,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            decoration: TextDecoration.none,
+                          ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                      ),
+                    ),
+                  ],
+                ),
                 SizedBox(height: 24),
                 InkWell(
-                  onTap:() {
-
-                  } ,
+                  onTap: () {
+                    signUpWithGoogle();
+                  },
                   child: Container(
                     padding: EdgeInsets.symmetric(vertical: 11),
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Theme.of(context).colorScheme.onPrimaryContainer),
-                        color: Theme.of(context).colorScheme.onPrimary
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                     child: Row(
                       spacing: 16,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset(AssetsManager.google,width: 24,height: 24,fit: BoxFit.fill,),
-                        Text(StringsManager.signupWithGoogle, style: Theme
-                            .of(context)
-                            .textTheme
-                            .headlineMedium?.copyWith(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            decoration: TextDecoration.none),)
-                      ],),
+                        Image.asset(
+                          AssetsManager.google,
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.fill,
+                        ),
+                        Text(
+                          StringsManager.signupWithGoogle,
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.none,
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -215,47 +238,125 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Future<void> createNewAccount() async{
-    try{
+  Future<void> createNewAccount() async {
+    try {
       DialogUtils.showLoadingDialog(context);
-      var credential  = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      ); // singleton
-      await FirestoreManager.saveUser(userModel.User(
-        id: FirebaseAuth.instance.currentUser!.uid,
-        email: emailController.text,
-        name: nameController.text,
-        favorites:  []
-      ));
+      var credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: emailController.text,
+            password: passwordController.text,
+          ); // singleton
+      await FirestoreManager.saveUser(
+        userModel.User(
+          id: FirebaseAuth.instance.currentUser!.uid,
+          email: emailController.text,
+          name: nameController.text,
+          favorites: [],
+        ),
+      );
       Navigator.of(context).pop();
       Navigator.pushReplacementNamed(context, RoutesManager.homeRouteName);
       print(credential.user?.uid);
-    }on FirebaseAuthException catch(e){
+    } on FirebaseAuthException catch (e) {
       Navigator.of(context).pop();
       if (e.code == 'weak-password') {
-        DialogUtils.showMessageDialog(context: context,
+        DialogUtils.showMessageDialog(
+          context: context,
           content: "The password provided is too weak.",
           actionTitle: "Ok",
           actionPress: () {
             Navigator.of(context).pop();
-          },);
+          },
+        );
       } else if (e.code == 'email-already-in-use') {
-        DialogUtils.showMessageDialog(context: context,
+        DialogUtils.showMessageDialog(
+          context: context,
           content: "The account already exists for that email.",
           actionTitle: "Ok",
           actionPress: () {
             Navigator.of(context).pop();
-          },);
+          },
+        );
       }
-    }catch(e){
-      DialogUtils.showMessageDialog(context: context,
+    } catch (e) {
+      DialogUtils.showMessageDialog(
+        context: context,
         content: "exception: $e",
         actionTitle: "Ok",
         actionPress: () {
           Navigator.of(context).pop();
-        },);
+        },
+      );
+    }
+  }
 
+  Future<void> signUpWithGoogle() async {
+    try {
+      DialogUtils.showLoadingDialog(context);
+
+      final GoogleSignInAccount googleUser = await GoogleSignIn.instance
+          .authenticate();
+
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithCredential(credential);
+
+      final User? firebaseUser = userCredential.user;
+
+      if (firebaseUser == null) {
+        throw Exception("Google sign up failed");
+      }
+
+      await FirestoreManager.saveUser(
+        userModel.User(
+          id: firebaseUser.uid,
+          email: firebaseUser.email ?? "",
+          name: firebaseUser.displayName ?? "",
+          favorites: [],
+        ),
+      );
+
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      Navigator.pushReplacementNamed(context, RoutesManager.homeRouteName);
+    } on GoogleSignInException catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      DialogUtils.showMessageDialog(
+        context: context,
+        content: e.description ?? "Google sign up failed",
+        actionTitle: "Ok",
+        actionPress: () {
+          Navigator.of(context).pop();
+        },
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      DialogUtils.showMessageDialog(
+        context: context,
+        content: e.message ?? "Google sign up failed",
+        actionTitle: "Ok",
+        actionPress: () {
+          Navigator.of(context).pop();
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      DialogUtils.showMessageDialog(
+        context: context,
+        content: "Something went wrong: $e",
+        actionTitle: "Ok",
+        actionPress: () {
+          Navigator.of(context).pop();
+        },
+      );
     }
   }
 }

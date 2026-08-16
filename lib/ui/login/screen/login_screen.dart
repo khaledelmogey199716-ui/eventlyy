@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/resources/assets_manager.dart';
 import '../../../core/reusable_components/custom_field.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -44,10 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
           AssetsManager.logo,
           height: 27,
           fit: BoxFit.fitHeight,
-          color: Theme
-              .of(context)
-              .colorScheme
-              .primary,
+          color: Theme.of(context).colorScheme.primary,
         ),
       ),
       body: Padding(
@@ -60,11 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 Text(
                   StringsManager.loginToYourAccount,
-                  style: Theme
-                      .of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontSize: 24,
                     fontWeight: FontWeight.w600,
                   ),
@@ -114,10 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     child: Text(
                       StringsManager.forgetPassAsk,
-                      style: Theme
-                          .of(context)
-                          .textTheme
-                          .headlineMedium,
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),
                 ),
@@ -139,11 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Text(
                       "${StringsManager.dontHaveAcc} ",
-                      style: Theme
-                          .of(context)
-                          .textTheme
-                          .labelSmall
-                          ?.copyWith(
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -156,55 +143,74 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       child: Text(
                         StringsManager.signup,
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .headlineMedium,
+                        style: Theme.of(context).textTheme.headlineMedium,
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: 32),
-                Row(spacing: 16,
+                Row(
+                  spacing: 16,
                   children: [
-                    Expanded(child: Divider(color: Theme.of(context).colorScheme.onSecondary,)),
-                    Text(StringsManager.or,style: Theme
-                        .of(context)
-                        .textTheme
-                        .headlineMedium?.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        decoration: TextDecoration.none),),
-                    Expanded(child: Divider(color: Theme.of(context).colorScheme.onSecondary,)),
-                  ],),
+                    Expanded(
+                      child: Divider(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                      ),
+                    ),
+                    Text(
+                      StringsManager.or,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            decoration: TextDecoration.none,
+                          ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                      ),
+                    ),
+                  ],
+                ),
                 SizedBox(height: 24),
                 InkWell(
-                  onTap:() {
-
-                  } ,
+                  onTap: () {
+                    loginWithGoogle();
+                  },
                   child: Container(
                     padding: EdgeInsets.symmetric(vertical: 11),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Theme.of(context).colorScheme.onPrimaryContainer),
-                      color: Theme.of(context).colorScheme.onPrimary
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                     child: Row(
                       spacing: 16,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                      Image.asset(AssetsManager.google,width: 24,height: 24,fit: BoxFit.fill,),
-                      Text(StringsManager.loginWithGoogle, style: Theme
-                          .of(context)
-                          .textTheme
-                          .headlineMedium?.copyWith(
-                        fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      decoration: TextDecoration.none),)
-                    ],),
+                        Image.asset(
+                          AssetsManager.google,
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.fill,
+                        ),
+                        Text(
+                          StringsManager.loginWithGoogle,
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.none,
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-               ],
+              ],
             ),
           ),
         ),
@@ -225,27 +231,86 @@ class _LoginScreenState extends State<LoginScreen> {
     } on FirebaseAuthException catch (e) {
       Navigator.of(context).pop();
       if (e.code == 'user-not-found') {
-        DialogUtils.showMessageDialog(context: context,
-            content: "No user found for that email.",
-            actionTitle: "Ok",
-            actionPress: () {
-              Navigator.of(context).pop();
-            },);
+        DialogUtils.showMessageDialog(
+          context: context,
+          content: "No user found for that email.",
+          actionTitle: "Ok",
+          actionPress: () {
+            Navigator.of(context).pop();
+          },
+        );
       } else if (e.code == 'wrong-password') {
-        DialogUtils.showMessageDialog(context: context,
+        DialogUtils.showMessageDialog(
+          context: context,
           content: "Wrong password provided for that user.",
           actionTitle: "Ok",
           actionPress: () {
             Navigator.of(context).pop();
-          },);
+          },
+        );
       }
     } catch (e) {
-      DialogUtils.showMessageDialog(context: context,
+      DialogUtils.showMessageDialog(
+        context: context,
         content: "sign in exception : $e",
         actionTitle: "Ok",
         actionPress: () {
           Navigator.of(context).pop();
-        },);
+        },
+      );
+    }
+  }
+
+  Future<void> loginWithGoogle() async {
+    try {
+      DialogUtils.showLoadingDialog(context);
+
+      final GoogleSignInAccount googleUser = await GoogleSignIn.instance
+          .authenticate();
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+      );
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      Navigator.pushReplacementNamed(context, RoutesManager.homeRouteName);
+      print(userCredential.user?.uid);
+    } on GoogleSignInException catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      DialogUtils.showMessageDialog(
+        context: context,
+        content: e.description ?? "Google login failed.",
+        actionTitle: "Ok",
+        actionPress: () {
+          Navigator.of(context).pop();
+        },
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      DialogUtils.showMessageDialog(
+        context: context,
+        content: e.message ?? "Google login failed.",
+        actionTitle: "Ok",
+        actionPress: () {
+          Navigator.of(context).pop();
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      DialogUtils.showMessageDialog(
+        context: context,
+        content: "Google login exception: $e",
+        actionTitle: "Ok",
+        actionPress: () {
+          Navigator.of(context).pop();
+        },
+      );
     }
   }
 }
