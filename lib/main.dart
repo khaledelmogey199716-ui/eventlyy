@@ -11,6 +11,7 @@ import 'package:evently_c19/ui/onboarding/screen/onboarding_screen.dart';
 import 'package:evently_c19/ui/signup/screen/signup_screen.dart';
 import 'package:evently_c19/ui/start/screen/start_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -22,8 +23,9 @@ void main() async{
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await PrefsManager.init();
+  await GoogleSignIn.instance.initialize();
 
-   // await PrefsManager.resetOnboarding(); ///////// MAKE SURE TO REMOVE BEFORE RELEASE
+
   // await PrefsManager.resetOnboarding(); ///////// MAKE SURE TO REMOVE BEFORE RELEASE
 
   String initialRoute;
@@ -70,9 +72,7 @@ class MyApp extends StatelessWidget {
         RoutesManager.onboardingRouteName:(_)=>OnboardingScreen(),
       },
       initialRoute: initialRoute
-      // FirebaseAuth.instance.currentUser!=null
-      //     ?RoutesManager.homeRouteName
-      //     :RoutesManager.loginRouteName,
+
     );
   }
 }
