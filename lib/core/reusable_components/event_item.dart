@@ -13,7 +13,8 @@ import 'package:provider/provider.dart';
 class EventItem extends StatefulWidget {
   Event event;
   bool isFavorite;
-  EventItem(this.event,{this.isFavorite = false});
+  Function() onClick;
+  EventItem(this.event,{this.isFavorite = false,required this.onClick});
 
   @override
   State<EventItem> createState() => _EventItemState();
@@ -26,9 +27,7 @@ class _EventItemState extends State<EventItem> {
     double screenHeight = MediaQuery.of(context).size.height;
     UserProvider userProvider = Provider.of<UserProvider>(context);
     return InkWell(
-      onTap: () {
-
-      },
+      onTap: widget.onClick,
       child: Container(
         height: screenHeight * 0.25,
         decoration: BoxDecoration(

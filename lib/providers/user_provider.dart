@@ -9,4 +9,10 @@ class UserProvider extends ChangeNotifier{
     user = await FirestoreManager.getUser();
     notifyListeners();
   }
+
+  void clearUser() {
+    user = null;
+    notifyListeners();
+  }
+
 }

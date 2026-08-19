@@ -18,32 +18,49 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   await PrefsManager.init();
   await GoogleSignIn.instance.initialize();
 
-
-  // await PrefsManager.resetOnboarding(); ///////// MAKE SURE TO REMOVE BEFORE RELEASE
+ await PrefsManager.resetOnboarding(); ///////// MAKE SURE TO REMOVE BEFORE RELEASE
 
   String initialRoute;
 
   if (!PrefsManager.isOnboardingCompleted) {
     initialRoute = RoutesManager.startRouteName;
-    initialRoute = RoutesManager.onboardingRouteName;
   } else if (FirebaseAuth.instance.currentUser != null) {
     initialRoute = RoutesManager.homeRouteName;
   } else {
     initialRoute = RoutesManager.loginRouteName;
   }
 
-  runApp(ChangeNotifierProvider(
-      create: (context) => ThemeProvider()..init(),
-      child: MyApp(initialRoute: initialRoute,)));
+  final userProvider = UserProvider();
+
+  if (FirebaseAuth.instance.currentUser != null) {
+    await userProvider.fetchUser();
+  }
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => ThemeProvider()..init(),
+        ),
+        ChangeNotifierProvider.value(
+          value: userProvider,
+        ),
+      ],
+      child: MyApp(initialRoute: initialRoute),
+    ),
+  );
 }
+
 
 class MyApp extends StatelessWidget {
   final String initialRoute;
@@ -57,25 +74,21 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     ThemeProvider themeProvider = Provider.of<ThemeProvider>(context);
     return MaterialApp(
-      themeMode://ThemeMode.light,
-      themeProvider.selectedTheme,
+      themeMode:themeProvider.selectedTheme,
       theme: AppTheme.lightTheme ,
       darkTheme:AppTheme.darkTheme ,
       debugShowCheckedModeBanner: false,
       routes: {
         RoutesManager.startRouteName:(_)=>StartScreen(),
         RoutesManager.loginRouteName:(_)=>LoginScreen(),
-        RoutesManager.homeRouteName:(_)=>ChangeNotifierProvider(
-            create: (context) => UserProvider()..fetchUser(),
-            child: HomeScreen()),
+        RoutesManager.homeRouteName: (_) => HomeScreen(),
         RoutesManager.signupRouteName:(_)=>SignupScreen(),
         RoutesManager.forgetpassRouteName:(_)=>ForgetPassScreen(),
         RoutesManager.addEventRouteName:(_)=>AddEventScreen(),
         RoutesManager.onboardingRouteName:(_)=>OnboardingScreen(),
         RoutesManager.eventDetailsRouteName:(_)=>EventDetailsScreen(),
       },
-      initialRoute: //RoutesManager.eventDetailsRouteName
-      initialRoute
+      initialRoute: initialRoute
 
     );
   }

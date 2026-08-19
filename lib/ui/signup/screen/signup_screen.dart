@@ -1,8 +1,10 @@
 import 'package:evently_c19/core/remote/network/firestore_manager.dart';
 import 'package:evently_c19/core/resources/dialog_utils.dart';
+import 'package:evently_c19/providers/user_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:evently_c19/model/user.dart' as userModel;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/resources/app_constants.dart';
 import '../../../core/resources/assets_manager.dart';
@@ -241,47 +243,86 @@ class _SignupScreenState extends State<SignupScreen> {
   Future<void> createNewAccount() async {
     try {
       DialogUtils.showLoadingDialog(context);
-      var credential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-            email: emailController.text,
-            password: passwordController.text,
-          ); // singleton
+
+      final credential =
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
+
+      final firebaseUser = credential.user;
+
+      if (firebaseUser == null) {
+        throw Exception("Account creation failed");
+      }
+
       await FirestoreManager.saveUser(
         userModel.User(
-          id: FirebaseAuth.instance.currentUser!.uid,
-          email: emailController.text,
-          name: nameController.text,
+          id: firebaseUser.uid,
+          email: emailController.text.trim(),
+          name: nameController.text.trim(),
           favorites: [],
         ),
       );
+
+      final userProvider = Provider.of<UserProvider>(
+        context,
+        listen: false,
+      );
+
+      await userProvider.fetchUser();
+
+      if (!mounted) return;
+
       Navigator.of(context).pop();
-      Navigator.pushReplacementNamed(context, RoutesManager.homeRouteName);
-      print(credential.user?.uid);
+
+      Navigator.pushReplacementNamed(
+        context,
+        RoutesManager.homeRouteName,
+      );
+
+      print("SIGNUP SUCCESS: ${firebaseUser.email}");
+      print("UID: ${firebaseUser.uid}");
     } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
       Navigator.of(context).pop();
-      if (e.code == 'weak-password') {
-        DialogUtils.showMessageDialog(
-          context: context,
-          content: "The password provided is too weak.",
-          actionTitle: "Ok",
-          actionPress: () {
-            Navigator.of(context).pop();
-          },
-        );
-      } else if (e.code == 'email-already-in-use') {
-        DialogUtils.showMessageDialog(
-          context: context,
-          content: "The account already exists for that email.",
-          actionTitle: "Ok",
-          actionPress: () {
-            Navigator.of(context).pop();
-          },
-        );
+
+      String message;
+
+      switch (e.code) {
+        case 'weak-password':
+          message = "The password provided is too weak.";
+          break;
+
+        case 'email-already-in-use':
+          message = "The account already exists for that email.";
+          break;
+
+        case 'invalid-email':
+          message = "The email address is invalid.";
+          break;
+
+        default:
+          message = e.message ?? "Signup failed.";
       }
-    } catch (e) {
+
       DialogUtils.showMessageDialog(
         context: context,
-        content: "exception: $e",
+        content: message,
+        actionTitle: "Ok",
+        actionPress: () {
+          Navigator.of(context).pop();
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      Navigator.of(context).pop();
+
+      DialogUtils.showMessageDialog(
+        context: context,
+        content: "Something went wrong: $e",
         actionTitle: "Ok",
         actionPress: () {
           Navigator.of(context).pop();
@@ -320,6 +361,14 @@ class _SignupScreenState extends State<SignupScreen> {
           favorites: [],
         ),
       );
+
+      final userProvider = Provider.of<UserProvider>(
+        context,
+        listen: false,
+      );
+
+      await userProvider.fetchUser();
+
 
       if (!mounted) return;
       Navigator.of(context).pop();

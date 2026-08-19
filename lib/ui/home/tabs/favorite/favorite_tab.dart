@@ -1,4 +1,5 @@
 import 'package:evently_c19/core/resources/assets_manager.dart';
+import 'package:evently_c19/core/resources/routes_manager.dart';
 import 'package:evently_c19/core/reusable_components/custom_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -82,7 +83,9 @@ class _FavoriteTabState extends State<FavoriteTab> {
                     return Center(child: Text("No Events Found"),);
                   }
                   return ListView.separated(
-                    itemBuilder: (context, index) => EventItem(eventsList[index],isFavorite: true,),
+                    itemBuilder: (context, index) => EventItem(eventsList[index],isFavorite: true,onClick: () {
+                      Navigator.of(context).pushNamed(RoutesManager.eventDetailsRouteName,arguments: eventsList[index]);
+                    }),
                     separatorBuilder: (context, index) => SizedBox(height: 16),
                     itemCount: eventsList.length,
                   );

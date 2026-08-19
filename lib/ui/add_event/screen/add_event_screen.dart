@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:evently_c19/core/remote/network/firestore_manager.dart';
 import 'package:evently_c19/core/resources/app_constants.dart';
 import 'package:evently_c19/core/resources/dialog_utils.dart';
+import 'package:evently_c19/core/resources/routes_manager.dart';
 import 'package:evently_c19/core/reusable_components/custom_btn.dart';
 import 'package:evently_c19/core/reusable_components/custom_field.dart';
 import 'package:evently_c19/model/event.dart';
@@ -12,12 +13,11 @@ import 'package:intl/intl.dart';
 
 import '../../../core/resources/assets_manager.dart';
 import '../../../core/resources/my_flutter_app_icons.dart';
-import '../../../core/resources/strings_manager.dart';
 import '../widgets/image_tab_view.dart';
 
 class AddEventScreen extends StatefulWidget {
-  const AddEventScreen({super.key});
-
+Event? event;
+AddEventScreen({this.event});
   @override
   State<AddEventScreen> createState() => _AddEventScreenState();
 }
@@ -29,12 +29,46 @@ class _AddEventScreenState extends State<AddEventScreen> {
   int selectedTab = 0;
 
   @override
+  @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    titleController = TextEditingController();
-    descController = TextEditingController();
+
+    titleController = TextEditingController(
+      text: widget.event?.title ?? "",
+    );
+
+    descController = TextEditingController(
+      text: widget.event?.description ?? "",
+    );
+
+    if (widget.event != null) {
+      final event = widget.event!;
+
+      if (event.dateTime != null) {
+        final date = event.dateTime!.toDate();
+
+        selectionDate = DateTime(
+          date.year,
+          date.month,
+          date.day,
+        );
+
+        selectionTime = TimeOfDay(
+          hour: date.hour,
+          minute: date.minute,
+        );
+      }
+
+      if (event.type != null) {
+        selectedTab = AppConstants.eventTypes.indexOf(event.type!);
+
+        if (selectedTab == -1) {
+          selectedTab = 0;
+        }
+      }
+    }
   }
+
 
   @override
   void dispose() {
@@ -52,7 +86,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
         .height;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add event"),
+        title: widget.event!=null ?Text("Edit event"):Text("Add event"),
         leading: IconButton(
           onPressed: () {
             Navigator.of(context).pop();
@@ -89,6 +123,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
         padding: EdgeInsets.all(16),
         child: DefaultTabController(
           length: 5,
+          initialIndex: selectedTab,
           child: Form(
             key: formKey,
             child: SingleChildScrollView(
@@ -252,7 +287,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
                           return null;
                         },
                         controller: titleController,
-                        hint: "Event Title",
+                        hint: widget.event != null ? "" : "Event Title",
                         keyboard: TextInputType.text,
                       ),
                     ],
@@ -281,7 +316,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
                           return null;
                         },
                         controller: descController,
-                        hint: "Event Description",
+                        hint: widget.event != null ? "" : "Event Description",
                         keyboard: TextInputType.text,
                       ),
                     ],
@@ -362,15 +397,22 @@ class _AddEventScreenState extends State<AddEventScreen> {
                   ),
                   Container(
                     width: double.infinity,
-                    child: CustomBtn(title: "Add Event", onClick: () {
-                      if (formKey.currentState?.validate() ?? false) {
-                        if (selectionDate != null && selectionTime != null) {
-                          addNewEvent();
-                        } else {
-                         DialogUtils.showSnackbar(context, "Event date and time are required");
+                    child: CustomBtn(
+                      title: widget.event != null ? "Update Event" : "Add Event",
+                      onClick: () async {
+                        if (formKey.currentState?.validate() ?? false) {
+                          if (selectionDate != null && selectionTime != null) {
+                            await addNewEvent();
+                          } else {
+                            DialogUtils.showSnackbar(
+                              context,
+                              "Event date and time are required",
+                            );
+                          }
                         }
-                      }
-                    },),
+                      },
+                    ),
+
                   )
                 ],
               ),
@@ -411,20 +453,48 @@ class _AddEventScreenState extends State<AddEventScreen> {
     }
   }
 
-  addNewEvent() async{
+  Future<void> addNewEvent() async {
     DateTime eventDate = DateTime(
-        selectionDate!.year, selectionDate!.month, selectionDate!.day,
-        selectionTime!.hour, selectionTime!.minute);
-    DialogUtils.showLoadingDialog(context);
-    await FirestoreManager.addEvent(Event(
-        title: titleController.text,
-        description: descController.text,
+      selectionDate!.year,
+      selectionDate!.month,
+      selectionDate!.day,
+      selectionTime!.hour,
+      selectionTime!.minute,
+    );
+    try {
+      DialogUtils.showLoadingDialog(context);
+      final event = Event(
+        id: widget.event?.id,
+        title: titleController.text.trim(),
+        description: descController.text.trim(),
         type: AppConstants.eventTypes[selectedTab],
-        userId: FirebaseAuth.instance.currentUser!.uid,
+        userId: widget.event?.userId ??
+            FirebaseAuth.instance.currentUser!.uid,
         dateTime: Timestamp.fromDate(eventDate),
-    ));
-    Navigator.of(context).pop();
-    DialogUtils.showSnackbar(context, "Event added successfully");
+      );
 
+      if (widget.event == null) {
+        await FirestoreManager.addEvent(event);
+      } else {
+        await FirestoreManager.updateEvent(event);
+
+      }
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed(RoutesManager.homeRouteName);
+      DialogUtils.showSnackbar(
+        context,
+        widget.event == null
+            ? "Event added successfully"
+            : "Event updated successfully",
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      DialogUtils.showSnackbar(
+        context,
+        "Something went wrong: $e",
+      );
+    }
   }
+
 }
