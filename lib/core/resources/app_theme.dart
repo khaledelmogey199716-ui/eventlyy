@@ -88,7 +88,7 @@ class AppTheme {
         labelSmall: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,
-          color: ColorsManager.hintTextColor
+          color: ColorsManager.hintTextColor,
         ),
         headlineMedium: TextStyle(
             fontWeight: FontWeight.w600,
@@ -96,7 +96,20 @@ class AppTheme {
             color: ColorsManager.primaryColor,
             decoration: TextDecoration.underline,
             decorationColor: ColorsManager.primaryColor
-        )
+        ),
+        displayLarge: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 16,
+            color: ColorsManager.secondaryColor,
+        ),
+        bodySmall: TextStyle(
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            color: ColorsManager.secondaryColor,
+          height: 1.55
+        ),
+
+
     )
   );
   static ThemeData darkTheme= ThemeData(
@@ -172,7 +185,7 @@ class AppTheme {
         labelSmall: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: ColorsManager.darkTeritaryColor
+            color: ColorsManager.darkTeritaryColor,
         ),
         headlineMedium: TextStyle(
           fontWeight: FontWeight.w600,
@@ -181,6 +194,18 @@ class AppTheme {
           decoration: TextDecoration.underline,
           decorationColor: ColorsManager.darkPrimaryColor
         ),
+        displayLarge: TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 16,
+          color: ColorsManager.darkPrimaryColor,
+        ),
+        bodySmall: TextStyle(
+          fontWeight: FontWeight.w400,
+          fontSize: 14,
+          color: ColorsManager.darkTeritaryColor,
+          height: 1.55
+        ),
+
       ),
     colorScheme: ColorScheme.dark(
       primary: ColorsManager.darkPrimaryColor,
