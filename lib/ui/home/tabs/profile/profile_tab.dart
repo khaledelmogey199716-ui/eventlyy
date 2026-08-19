@@ -25,70 +25,86 @@ class ProfileTab extends StatelessWidget {
               radius: 52,
               backgroundImage: AssetImage(AssetsManager.route),
             ),
-            SizedBox(height: 16,),
+            SizedBox(height: 16),
             Consumer<UserProvider>(
-                builder: (context, userProvider, child) {
-                  if(userProvider.user==null){
-                    return Center(child: CircularProgressIndicator(),);
-                  }
-                  return Text(userProvider.user?.name??"", style: Theme
-                      .of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(
-                      fontWeight: FontWeight.w600, fontSize: 20
-                  ),);
-                },
+              builder: (context, userProvider, child) {
+                if (userProvider.user == null) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                return Text(
+                  userProvider.user?.name ?? "",
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 20,
+                  ),
+                );
+              },
             ),
-            Text(FirebaseAuth.instance.currentUser!.email??"", style: Theme
-                .of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(
-                fontSize: 14
-            ),),
-            SizedBox(height: 24,),
+            Text(
+              FirebaseAuth.instance.currentUser!.email ?? "",
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontSize: 14),
+            ),
+            SizedBox(height: 24),
             Column(
               spacing: 32,
               children: [
-                SettingsBtn(title: "Dark Mode", action:Switch(
+                SettingsBtn(
+                  title: "Dark Mode",
+                  action: Switch(
                     value: themeProvider.selectedTheme == ThemeMode.dark,
 
                     onChanged: (value) {
-                      if(value){
+                      if (value) {
                         themeProvider.changeTheme(ThemeMode.dark);
-                      }else{
+                      } else {
                         themeProvider.changeTheme(ThemeMode.light);
-
                       }
                     },
-                )
+                  ),
                 ),
-                SettingsBtn(title: StringsManager.language,
-                    onClick: () {
-
-                    },
-                    action: SvgPicture.asset(AssetsManager.arrowRight)),
-                SettingsBtn(title: "Logout",
-                    onClick: () async{
-                      try{
-                        DialogUtils.showLoadingDialog(context);
-                        await FirebaseAuth.instance.signOut();
+                SettingsBtn(
+                  title: StringsManager.language,
+                  onClick: () {},
+                  action: SvgPicture.asset(AssetsManager.arrowRight),
+                ),
+                SettingsBtn(
+                  title: "Logout",
+                  onClick: () async {
+                    try {
+                      DialogUtils.showLoadingDialog(context);
+                      final userProvider = Provider.of<UserProvider>(
+                        context,
+                        listen: false,
+                      );
+                      await FirebaseAuth.instance.signOut();
+                      userProvider.clearUser();
+                      if (context.mounted) {
                         Navigator.of(context).pop();
-                        Navigator.pushReplacementNamed(context, RoutesManager.loginRouteName);
-                      }catch(e){
-                        Navigator.of(context).pop();
-                        DialogUtils.showMessageDialog(context: context,
-                            content: e.toString(),
-                            actionTitle: "Ok",
-                            actionPress: () {
-                              Navigator.of(context).pop();
-                            },
+                        Navigator.pushReplacementNamed(
+                          context,
+                          RoutesManager.loginRouteName,
                         );
                       }
-                    },
-                    action: SvgPicture.asset(AssetsManager.logout)),
-              ],)
+                    } catch (e) {
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+                        DialogUtils.showMessageDialog(
+                          context: context,
+                          content: e.toString(),
+                          actionTitle: "Ok",
+                          actionPress: () {
+                            Navigator.of(context).pop();
+                          },
+                        );
+                      }
+                    }
+                  },
+                  action: SvgPicture.asset(AssetsManager.logout),
+                ),
+              ],
+            ),
           ],
         ),
       ),

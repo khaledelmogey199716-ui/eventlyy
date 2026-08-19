@@ -118,4 +118,12 @@ class FirestoreManager {
     var doc = collection.doc(auth.FirebaseAuth.instance.currentUser!.uid);
     return doc.update({"favorites":favorites});
   }
+
+  static Future<void> updateEvent(Event event) async {
+    await FirebaseFirestore.instance
+        .collection('Event')
+        .doc(event.id)
+        .update(event.toFirestore());
+  }
+
 }

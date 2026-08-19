@@ -1,4 +1,5 @@
 import 'package:evently_c19/core/remote/network/firestore_manager.dart';
+import 'package:evently_c19/core/resources/routes_manager.dart';
 import 'package:evently_c19/core/reusable_components/event_item.dart';
 import 'package:flutter/material.dart';
 
@@ -38,7 +39,9 @@ class _AllTabViewState extends State<AllTabView> {
             return Center(child: Text("No Events Found"),);
           }
           return ListView.separated(
-            itemBuilder: (context, index) => EventItem(eventsList[index]),
+            itemBuilder: (context, index) => EventItem(eventsList[index],onClick: () {
+              Navigator.of(context).pushNamed(RoutesManager.eventDetailsRouteName,arguments: eventsList[index]);
+            },),
             separatorBuilder: (context, index) => SizedBox(height: 16),
             itemCount: eventsList.length,
           );

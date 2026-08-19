@@ -92,7 +92,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     spacing: 8,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Image.asset(onboarding[index].image,width: double.infinity,fit: BoxFit.fitWidth,),
+                      Image.asset(onboarding[index].image,width: double.infinity,fit: BoxFit.fitWidth,color: Theme.of(context).colorScheme.onTertiary,),
                       PageIndicator(currentPage: currentPage,pageCount: 3,),
                       Text(onboarding[index].text1,style: Theme.of(context).textTheme.titleMedium,),
                       Expanded(child: Text(onboarding[index].text2,style: Theme.of(context).textTheme.bodyMedium,)),

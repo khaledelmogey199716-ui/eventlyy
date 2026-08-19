@@ -3,8 +3,11 @@ import 'package:evently_c19/core/resources/dialog_utils.dart';
 import 'package:evently_c19/core/resources/routes_manager.dart';
 import 'package:evently_c19/core/resources/strings_manager.dart';
 import 'package:evently_c19/core/reusable_components/custom_btn.dart';
+import 'package:evently_c19/providers/user_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/resources/assets_manager.dart';
 import '../../../core/reusable_components/custom_field.dart';
@@ -219,40 +222,63 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> login() async {
+    print(
+      "Firebase project: ${Firebase.app().options.projectId}",
+    );
+
     try {
       DialogUtils.showLoadingDialog(context);
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text,
+
+      final credential =
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
         password: passwordController.text,
       );
+
+      final userProvider = Provider.of<UserProvider>(
+        context,
+        listen: false,
+      );
+
+      await userProvider.fetchUser();
+
+      if (!mounted) return;
+
       Navigator.of(context).pop();
-      Navigator.pushReplacementNamed(context, RoutesManager.homeRouteName);
-      print(credential.user?.uid);
+
+      Navigator.pushReplacementNamed(
+        context,
+        RoutesManager.homeRouteName,
+      );
+
     } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
       Navigator.of(context).pop();
-      if (e.code == 'user-not-found') {
-        DialogUtils.showMessageDialog(
-          context: context,
-          content: "No user found for that email.",
-          actionTitle: "Ok",
-          actionPress: () {
-            Navigator.of(context).pop();
-          },
-        );
-      } else if (e.code == 'wrong-password') {
-        DialogUtils.showMessageDialog(
-          context: context,
-          content: "Wrong password provided for that user.",
-          actionTitle: "Ok",
-          actionPress: () {
-            Navigator.of(context).pop();
-          },
-        );
+
+      print("LOGIN FAILED");
+      print("CODE: ${e.code}");
+      print("MESSAGE: ${e.message}");
+
+      String message;
+
+      switch (e.code) {
+        case 'user-not-found':
+          message = "No user found for that email.";
+          break;
+
+        case 'wrong-password':
+        case 'invalid-credential':
+          message = "Incorrect email or password.";
+          break;
+
+        default:
+          message = e.message ?? "Login failed.";
       }
-    } catch (e) {
+
       DialogUtils.showMessageDialog(
         context: context,
-        content: "sign in exception : $e",
+        content: message,
         actionTitle: "Ok",
         actionPress: () {
           Navigator.of(context).pop();
@@ -261,23 +287,35 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+
   Future<void> loginWithGoogle() async {
     try {
       DialogUtils.showLoadingDialog(context);
-
-      final GoogleSignInAccount googleUser = await GoogleSignIn.instance
-          .authenticate();
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
+      final GoogleSignInAccount googleUser =
+      await GoogleSignIn.instance.authenticate();
+      final GoogleSignInAuthentication googleAuth =
+          googleUser.authentication;
+      final AuthCredential googleCredential =
+      GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(
-        credential,
+      final UserCredential userCredential =
+      await FirebaseAuth.instance.signInWithCredential(
+        googleCredential,
       );
+      final userProvider = Provider.of<UserProvider>(
+        context,
+        listen: false,
+      );
+      await userProvider.fetchUser();
       if (!mounted) return;
       Navigator.of(context).pop();
-      Navigator.pushReplacementNamed(context, RoutesManager.homeRouteName);
-      print(userCredential.user?.uid);
+      Navigator.pushReplacementNamed(
+        context,
+        RoutesManager.homeRouteName,
+      );
+      print("Google login SUCCESS: ${userCredential.user?.email}");
+      print("UID: ${userCredential.user?.uid}");
     } on GoogleSignInException catch (e) {
       if (!mounted) return;
       Navigator.of(context).pop();
@@ -313,4 +351,5 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }
   }
+
 }

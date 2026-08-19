@@ -1,15 +1,49 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:evently_c19/core/resources/app_constants.dart';
 import 'package:evently_c19/core/resources/assets_manager.dart';
 import 'package:evently_c19/core/resources/colors_manager.dart';
+import 'package:evently_c19/core/resources/routes_manager.dart';
 import 'package:evently_c19/core/resources/strings_manager.dart';
+import 'package:evently_c19/model/event.dart';
+import 'package:evently_c19/providers/theme_provider.dart';
+import 'package:evently_c19/providers/user_provider.dart';
+import 'package:evently_c19/ui/add_event/screen/add_event_screen.dart';
 import 'package:evently_c19/ui/event_details/wigdets/btn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
-class EventDetailsScreen extends StatelessWidget {
+class EventDetailsScreen extends StatefulWidget {
   const EventDetailsScreen({super.key});
 
   @override
+  State<EventDetailsScreen> createState() => _EventDetailsScreenState();
+}
+
+class _EventDetailsScreenState extends State<EventDetailsScreen> {
+  late Event event;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    event = ModalRoute.of(context)!.settings.arguments as Event;
+  }
+
+  @override
   Widget build(BuildContext context) {
+
+
+    final userProvider = Provider.of<UserProvider>(context);
+    final isMyEvent = event.userId == userProvider.user?.id;
+
+    final date = event.dateTime!.toDate();
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final imagePath = themeProvider.selectedTheme == ThemeMode.dark
+        ? AppConstants.darkEventTypeImage[event.type!]!
+        : AppConstants.lightEventTypeImage[event.type!]!;
+
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
@@ -36,12 +70,42 @@ class EventDetailsScreen extends StatelessWidget {
             ),
           ),
         ),
-        actions: [
-          Btn(onClick: () {}, icon: AssetsManager.edit),
-          SizedBox(width: 8),
-          Btn(onClick: () {}, icon: AssetsManager.delete),
-          SizedBox(width: 16),
-        ],
+        actions: isMyEvent
+            ? [
+          Btn(
+            onClick: () async {
+              final updatedEvent = await Navigator.push<Event>(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddEventScreen(
+                    event: event,
+                  ),
+                ),
+              );
+
+              if (updatedEvent != null && mounted) {
+                setState(() {
+                  event = updatedEvent;
+                });
+              }
+            },
+            icon: AssetsManager.edit,
+          ),
+
+
+          const SizedBox(width: 8),
+                Btn(
+                  onClick: () async {
+                    await deleteEvent(event);
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  icon: AssetsManager.delete,
+                ),
+                const SizedBox(width: 16),
+              ]
+            : null,
       ),
       body: Padding(
         padding: const EdgeInsets.only(right: 16, left: 16, top: 16),
@@ -58,14 +122,11 @@ class EventDetailsScreen extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
-                  child: Image.asset(
-                    AssetsManager.birthday_dark,
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.asset(imagePath, fit: BoxFit.cover),
                 ),
               ),
               Text(
-                "We’re going to play football ",
+                event.title ?? "",
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                   fontSize: 18,
@@ -99,11 +160,11 @@ class EventDetailsScreen extends StatelessWidget {
                     Column(
                       children: [
                         Text(
-                          "21 January ",
+                          DateFormat('dd MMMM').format(date),
                           style: Theme.of(context).textTheme.displayLarge,
                         ),
                         Text(
-                          "12:12 PM",
+                          DateFormat('hh:mm a').format(date),
                           style: TextStyle(
                             color: ColorsManager.unselectedTab,
                             fontSize: 16,
@@ -128,8 +189,7 @@ class EventDetailsScreen extends StatelessWidget {
                   ),
                   TextFormField(
                     enabled: false,
-                    initialValue:
-                        "Lorem ipsum dolor sit amet consectetur. Vulputate eleifend suscipit eget neque senectus a. Nulla at non malesuada odio duis lectus amet nisi sit. Risus hac enim maecenas auctor et. At cras massa diam porta facilisi lacus purus. Iaculis eget quis ut amet. Sit ac malesuada nisi quis  feugiat.",
+                    initialValue: event.description ?? "",
                     maxLines: null,
                     style: Theme.of(context).textTheme.bodySmall,
                     decoration: InputDecoration(
@@ -153,5 +213,9 @@ class EventDetailsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  static Future<void> deleteEvent(Event event) async {
+    await FirebaseFirestore.instance.collection('Event').doc(event.id).delete();
   }
 }
