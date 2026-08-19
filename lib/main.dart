@@ -28,8 +28,6 @@ void main() async {
   await PrefsManager.init();
   await GoogleSignIn.instance.initialize();
 
- await PrefsManager.resetOnboarding(); ///////// MAKE SURE TO REMOVE BEFORE RELEASE
-
   String initialRoute;
 
   if (!PrefsManager.isOnboardingCompleted) {
