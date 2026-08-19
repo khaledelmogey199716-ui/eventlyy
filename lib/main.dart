@@ -4,6 +4,7 @@ import 'package:evently_c19/core/resources/routes_manager.dart';
 import 'package:evently_c19/providers/theme_provider.dart';
 import 'package:evently_c19/providers/user_provider.dart';
 import 'package:evently_c19/ui/add_event/screen/add_event_screen.dart';
+import 'package:evently_c19/ui/event_details/screen/event_details_screen.dart';
 import 'package:evently_c19/ui/forget_pass/screen/forget_pass_screen.dart';
 import 'package:evently_c19/ui/home/screen/home_screen.dart';
 import 'package:evently_c19/ui/login/screen/login_screen.dart';
@@ -56,7 +57,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     ThemeProvider themeProvider = Provider.of<ThemeProvider>(context);
     return MaterialApp(
-      themeMode: themeProvider.selectedTheme,
+      themeMode://ThemeMode.light,
+      themeProvider.selectedTheme,
       theme: AppTheme.lightTheme ,
       darkTheme:AppTheme.darkTheme ,
       debugShowCheckedModeBanner: false,
@@ -70,8 +72,10 @@ class MyApp extends StatelessWidget {
         RoutesManager.forgetpassRouteName:(_)=>ForgetPassScreen(),
         RoutesManager.addEventRouteName:(_)=>AddEventScreen(),
         RoutesManager.onboardingRouteName:(_)=>OnboardingScreen(),
+        RoutesManager.eventDetailsRouteName:(_)=>EventDetailsScreen(),
       },
-      initialRoute: initialRoute
+      initialRoute: //RoutesManager.eventDetailsRouteName
+      initialRoute
 
     );
   }

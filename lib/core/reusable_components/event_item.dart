@@ -25,69 +25,74 @@ class _EventItemState extends State<EventItem> {
     ThemeProvider themeProvider = Provider.of<ThemeProvider>(context);
     double screenHeight = MediaQuery.of(context).size.height;
     UserProvider userProvider = Provider.of<UserProvider>(context);
-    return Container(
-      height: screenHeight * 0.25,
-      decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).colorScheme.onPrimaryContainer),
-          borderRadius: BorderRadius.circular(16),
-          image: DecorationImage(
-              fit: BoxFit.fill,
-              image: AssetImage(themeProvider.selectedTheme == ThemeMode.dark
-                  ?AppConstants.darkEventTypeImage[widget.event.type!]!
-                  :AppConstants.lightEventTypeImage[widget.event.type!]!))
-      ),
-      padding:EdgeInsets.all(8) ,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Theme.of(context).colorScheme.onPrimaryContainer)
-            ),
-            child: Text(DateFormat.MMMd().format(widget.event.dateTime!.toDate()),style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              decoration: TextDecoration.none,
-              fontSize: 16
-            ),),
-          ),
-          Container(
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
+    return InkWell(
+      onTap: () {
+
+      },
+      child: Container(
+        height: screenHeight * 0.25,
+        decoration: BoxDecoration(
+            border: Border.all(color: Theme.of(context).colorScheme.onPrimaryContainer),
+            borderRadius: BorderRadius.circular(16),
+            image: DecorationImage(
+                fit: BoxFit.fill,
+                image: AssetImage(themeProvider.selectedTheme == ThemeMode.dark
+                    ?AppConstants.darkEventTypeImage[widget.event.type!]!
+                    :AppConstants.lightEventTypeImage[widget.event.type!]!))
+        ),
+        padding:EdgeInsets.all(8) ,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Theme.of(context).colorScheme.onPrimaryContainer)
+              ),
+              child: Text(DateFormat.MMMd().format(widget.event.dateTime!.toDate()),style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                decoration: TextDecoration.none,
+                fontSize: 16
+              ),),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(widget.event.title??"",style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500
-                  ),),
-                ),
-                InkWell(
-                  onTap: () {
-                    if(checkFavoriteEvent(userProvider)){
-                      // delete event from favorites
-                      deleteFavoriteEvent(userProvider);
-                    }else{
-                      // add event to favorites
-                      addFavoriteEvent(userProvider);
-                    }
-                  },
-                  child: SvgPicture.asset(
-                        checkFavoriteEvent(userProvider)
-                        ?AssetsManager.heart_selected
-                        :AssetsManager.heart,
-                    colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),),
-                )
-              ],
-            ),
-          )
-      ],),
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Theme.of(context).colorScheme.onPrimaryContainer)
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(widget.event.title??"",style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500
+                    ),),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      if(checkFavoriteEvent(userProvider)){
+                        // delete event from favorites
+                        deleteFavoriteEvent(userProvider);
+                      }else{
+                        // add event to favorites
+                        addFavoriteEvent(userProvider);
+                      }
+                    },
+                    child: SvgPicture.asset(
+                          checkFavoriteEvent(userProvider)
+                          ?AssetsManager.heart_selected
+                          :AssetsManager.heart,
+                      colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),),
+                  )
+                ],
+              ),
+            )
+        ],),
+      ),
     );
   }
 
