@@ -56,6 +56,12 @@ class FirestoreManager {
     return doc.set(event);
   }
 
+  static Future<void> updateEvent(Event event){
+    var collection = getEventCollection();
+    var doc = collection.doc(event.id);
+    return doc.set(event);
+  }
+
   static Future<List<Event>> getAllEvents()async{
     var collection = getEventCollection();
     var querySnapshot = await collection.get();

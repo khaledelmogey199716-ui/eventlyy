@@ -16,7 +16,10 @@ import '../../../core/resources/strings_manager.dart';
 import '../widgets/image_tab_view.dart';
 
 class AddEventScreen extends StatefulWidget {
-  const AddEventScreen({super.key});
+  final bool isEditing;
+  final Event? event;
+
+  const AddEventScreen({super.key, this.isEditing = false, this.event});
 
   @override
   State<AddEventScreen> createState() => _AddEventScreenState();
@@ -32,8 +35,18 @@ class _AddEventScreenState extends State<AddEventScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    titleController = TextEditingController();
-    descController = TextEditingController();
+    titleController = TextEditingController(
+      text: widget.isEditing ? widget.event!.title : null,
+    );
+    descController = TextEditingController(
+      text: widget.isEditing ? widget.event!.description : null,
+    );
+
+    if (widget.isEditing) {
+      DateTime tempDate = widget.event!.dateTime!.toDate();
+      selectionDate = tempDate;
+      selectionTime = TimeOfDay(hour: tempDate.hour, minute: tempDate.minute);
+    }
   }
 
   @override
@@ -46,13 +59,10 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add event"),
+        title: Text(widget.isEditing ? "Edit Event" : "Add Event"),
         leading: IconButton(
           onPressed: () {
             Navigator.of(context).pop();
@@ -61,24 +71,15 @@ class _AddEventScreenState extends State<AddEventScreen> {
             padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: Theme
-                  .of(context)
-                  .colorScheme
-                  .onPrimary,
+              color: Theme.of(context).colorScheme.onPrimary,
               border: Border.all(
-                color: Theme
-                    .of(context)
-                    .colorScheme
-                    .onPrimaryContainer,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
               ),
             ),
             child: SvgPicture.asset(
               AssetsManager.back,
               colorFilter: ColorFilter.mode(
-                Theme
-                    .of(context)
-                    .colorScheme
-                    .onTertiary,
+                Theme.of(context).colorScheme.onTertiary,
                 BlendMode.srcIn,
               ),
             ),
@@ -116,19 +117,13 @@ class _AddEventScreenState extends State<AddEventScreen> {
                     tabAlignment: TabAlignment.start,
                     dividerHeight: 0,
                     labelColor: Colors.white,
-                    unselectedLabelColor: Theme
-                        .of(
+                    unselectedLabelColor: Theme.of(
                       context,
-                    )
-                        .colorScheme
-                        .secondary,
+                    ).colorScheme.secondary,
                     isScrollable: true,
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicator: BoxDecoration(
-                      color: Theme
-                          .of(context)
-                          .colorScheme
-                          .primary,
+                      color: Theme.of(context).colorScheme.primary,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     tabs: [
@@ -235,14 +230,11 @@ class _AddEventScreenState extends State<AddEventScreen> {
                     children: [
                       Text(
                         "Title",
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .titleMedium
+                        style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16,
-                        ),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
                       ),
                       CustomField(
                         validation: (value) {
@@ -263,14 +255,11 @@ class _AddEventScreenState extends State<AddEventScreen> {
                     children: [
                       Text(
                         "Description",
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .titleMedium
+                        style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16,
-                        ),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
                       ),
                       CustomField(
                         maxLines: 5,
@@ -291,36 +280,32 @@ class _AddEventScreenState extends State<AddEventScreen> {
                       SvgPicture.asset(
                         AssetsManager.date,
                         colorFilter: ColorFilter.mode(
-                          Theme
-                              .of(context)
-                              .colorScheme
-                              .primary,
+                          Theme.of(context).colorScheme.primary,
                           BlendMode.srcIn,
                         ),
                       ),
-                      SizedBox(width: 8,),
-                      Text("Event Date", style: Theme
-                          .of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
-                      ),),
+                      SizedBox(width: 8),
+                      Text(
+                        "Event Date",
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
+                      ),
                       Spacer(),
                       InkWell(
-                          onTap: () {
-                            chooseDate();
-                          },
-                          child: Text(selectionDate != null
+                        onTap: () {
+                          chooseDate();
+                        },
+                        child: Text(
+                          selectionDate != null
                               ? DateFormat.yMMMd().format(selectionDate!)
-                              : "Choose Date", style: Theme
-                              .of(context)
-                              .textTheme
-                              .headlineMedium
-                              ?.copyWith(
-                              fontWeight: FontWeight.w400
-                          ),))
+                              : "Choose Date",
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(fontWeight: FontWeight.w400),
+                        ),
+                      ),
                     ],
                   ),
                   Row(
@@ -328,50 +313,56 @@ class _AddEventScreenState extends State<AddEventScreen> {
                       SvgPicture.asset(
                         AssetsManager.time,
                         colorFilter: ColorFilter.mode(
-                          Theme
-                              .of(context)
-                              .colorScheme
-                              .primary,
+                          Theme.of(context).colorScheme.primary,
                           BlendMode.srcIn,
                         ),
                       ),
-                      SizedBox(width: 8,),
-                      Text("Event Time", style: Theme
-                          .of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
-                      ),),
+                      SizedBox(width: 8),
+                      Text(
+                        "Event Time",
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
+                      ),
                       Spacer(),
                       InkWell(
-                          onTap: () {
-                            chooseTime();
-                          },
-                          child: Text(selectionTime != null
+                        onTap: () {
+                          chooseTime();
+                        },
+                        child: Text(
+                          selectionTime != null
                               ? selectionTime!.format(context)
-                              : "Choose Time", style: Theme
-                              .of(context)
-                              .textTheme
-                              .headlineMedium
-                              ?.copyWith(
-                              fontWeight: FontWeight.w400
-                          ),))
+                              : "Choose Time",
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(fontWeight: FontWeight.w400),
+                        ),
+                      ),
                     ],
                   ),
                   Container(
                     width: double.infinity,
-                    child: CustomBtn(title: "Add Event", onClick: () {
-                      if (formKey.currentState?.validate() ?? false) {
-                        if (selectionDate != null && selectionTime != null) {
-                          addNewEvent();
-                        } else {
-                         DialogUtils.showSnackbar(context, "Event date and time are required");
+                    child: CustomBtn(
+                      title: widget.isEditing ? "Update Event" : "Add Event",
+                      onClick: () {
+                        if (formKey.currentState?.validate() ?? false) {
+                          if (selectionDate != null && selectionTime != null) {
+                            if (widget.isEditing) {
+                              updateEvent();
+                            } else {
+                              addNewEvent();
+                            }
+                          } else {
+                            DialogUtils.showSnackbar(
+                              context,
+                              "Event date and time are required",
+                            );
+                          }
                         }
-                      }
-                    },),
-                  )
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -385,10 +376,10 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
   chooseDate() async {
     var newDate = await showDatePicker(
-        context: context,
-        initialDate: selectionDate,
-        firstDate: DateTime.now(),
-        lastDate: DateTime.now().add(Duration(days: 365))
+      context: context,
+      initialDate: selectionDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(Duration(days: 365)),
     );
     if (newDate != null) {
       setState(() {
@@ -401,8 +392,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
   chooseTime() async {
     var newTime = await showTimePicker(
-        context: context,
-        initialTime: selectionTime ?? TimeOfDay.now()
+      context: context,
+      initialTime: selectionTime ?? TimeOfDay.now(),
     );
     if (newTime != null) {
       setState(() {
@@ -411,20 +402,48 @@ class _AddEventScreenState extends State<AddEventScreen> {
     }
   }
 
-  addNewEvent() async{
+  addNewEvent() async {
     DateTime eventDate = DateTime(
-        selectionDate!.year, selectionDate!.month, selectionDate!.day,
-        selectionTime!.hour, selectionTime!.minute);
+      selectionDate!.year,
+      selectionDate!.month,
+      selectionDate!.day,
+      selectionTime!.hour,
+      selectionTime!.minute,
+    );
     DialogUtils.showLoadingDialog(context);
-    await FirestoreManager.addEvent(Event(
+    await FirestoreManager.addEvent(
+      Event(
         title: titleController.text,
         description: descController.text,
         type: AppConstants.eventTypes[selectedTab],
         userId: FirebaseAuth.instance.currentUser!.uid,
         dateTime: Timestamp.fromDate(eventDate),
-    ));
+      ),
+    );
     Navigator.of(context).pop();
     DialogUtils.showSnackbar(context, "Event added successfully");
+  }
 
+  void updateEvent() async {
+    DateTime eventDate = DateTime(
+      selectionDate!.year,
+      selectionDate!.month,
+      selectionDate!.day,
+      selectionTime!.hour,
+      selectionTime!.minute,
+    );
+    DialogUtils.showLoadingDialog(context);
+    await FirestoreManager.updateEvent(
+      Event(
+        id: widget.event!.id,
+        title: titleController.text,
+        description: descController.text,
+        type: AppConstants.eventTypes[selectedTab],
+        userId: FirebaseAuth.instance.currentUser!.uid,
+        dateTime: Timestamp.fromDate(eventDate),
+      ),
+    );
+    Navigator.of(context).pop();
+    DialogUtils.showSnackbar(context, "Event updateded successfully");
   }
 }
