@@ -3,6 +3,7 @@ import 'package:evently_c19/core/resources/dialog_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:evently_c19/model/user.dart' as userModel;
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../core/resources/app_constants.dart';
 import '../../../core/resources/assets_manager.dart';
@@ -168,45 +169,67 @@ class _SignupScreenState extends State<SignupScreen> {
                   ],
                 ),
                 SizedBox(height: 32),
-                Row(spacing: 16,
+                Row(
+                  spacing: 16,
                   children: [
-                    Expanded(child: Divider(color: Theme.of(context).colorScheme.onSecondary,)),
-                    Text(StringsManager.or,style: Theme
-                        .of(context)
-                        .textTheme
-                        .headlineMedium?.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        decoration: TextDecoration.none),),
-                    Expanded(child: Divider(color: Theme.of(context).colorScheme.onSecondary,)),
-                  ],),
+                    Expanded(
+                      child: Divider(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                      ),
+                    ),
+                    Text(
+                      StringsManager.or,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            decoration: TextDecoration.none,
+                          ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                      ),
+                    ),
+                  ],
+                ),
                 SizedBox(height: 24),
                 InkWell(
-                  onTap:() {
-
-                  } ,
+                  onTap: () async {
+                    await signInWithGoogle();
+                  },
                   child: Container(
                     padding: EdgeInsets.symmetric(vertical: 11),
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Theme.of(context).colorScheme.onPrimaryContainer),
-                        color: Theme.of(context).colorScheme.onPrimary
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                     child: Row(
                       spacing: 16,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset(AssetsManager.google,width: 24,height: 24,fit: BoxFit.fill,),
-                        Text(StringsManager.signupWithGoogle, style: Theme
-                            .of(context)
-                            .textTheme
-                            .headlineMedium?.copyWith(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            decoration: TextDecoration.none),)
-                      ],),
+                        Image.asset(
+                          AssetsManager.google,
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.fill,
+                        ),
+                        Text(
+                          StringsManager.signupWithGoogle,
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.none,
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -215,40 +238,118 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  createNewAccount() async{
-    try{
+  createNewAccount() async {
+    try {
       DialogUtils.showLoadingDialog(context);
-      var credential  = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      ); // singleton
-      await FirestoreManager.saveUser(userModel.User(
-        id: FirebaseAuth.instance.currentUser!.uid,
-        email: emailController.text,
-        name: nameController.text,
-        favorites:  []
-      ));
+      var credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: emailController.text,
+            password: passwordController.text,
+          ); // singleton
+      await FirestoreManager.saveUser(
+        userModel.User(
+          id: FirebaseAuth.instance.currentUser!.uid,
+          email: emailController.text,
+          name: nameController.text,
+          favorites: [],
+        ),
+      );
       Navigator.of(context).pop();
       Navigator.pushReplacementNamed(context, RoutesManager.homeRouteName);
       print(credential.user?.uid);
-    }on FirebaseAuthException catch(e){
+    } on FirebaseAuthException catch (e) {
       Navigator.of(context).pop();
       if (e.code == 'weak-password') {
-        DialogUtils.showMessageDialog(context: context,
+        DialogUtils.showMessageDialog(
+          context: context,
           content: "The password provided is too weak.",
           actionTitle: "Ok",
           actionPress: () {
             Navigator.of(context).pop();
-          },);
+          },
+        );
       } else if (e.code == 'email-already-in-use') {
-        DialogUtils.showMessageDialog(context: context,
+        DialogUtils.showMessageDialog(
+          context: context,
           content: "The account already exists for that email.",
           actionTitle: "Ok",
           actionPress: () {
             Navigator.of(context).pop();
-          },);
+          },
+        );
       }
-    }catch(e){
+    } catch (e) {
+      print("exeption: $e");
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      GoogleSignIn.instance.initialize(
+        serverClientId: '184376464634-24go0rcg5u1u2b2o5p748f1087pccgdl.apps.googleusercontent.com'
+      );
+
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance
+          .authenticate();
+
+      if (googleUser == null) {
+        DialogUtils.showMessageDialog(
+          context: context,
+          content: "Something went wrong, try again.",
+          actionTitle: "Ok",
+          actionPress: () {
+            Navigator.of(context).pop();
+          },
+        );
+        return;
+      }
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+      );
+
+      // Once signed in, return the UserCredential
+      var credentials = await FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
+
+      await FirestoreManager.saveUser(
+        userModel.User(
+          id: credentials.user?.uid,
+          email: credentials.user?.email,
+          name: credentials.user?.displayName,
+          favorites: [],
+        ),
+      );
+
+      Navigator.pushReplacementNamed(context, RoutesManager.homeRouteName);
+    } on FirebaseAuthException catch (e) {
+      Navigator.of(context).pop();
+      if (e.code == 'weak-password') {
+        DialogUtils.showMessageDialog(
+          context: context,
+          content: "The password provided is too weak.",
+          actionTitle: "Ok",
+          actionPress: () {
+            Navigator.of(context).pop();
+          },
+        );
+      } else if (e.code == 'email-already-in-use') {
+        DialogUtils.showMessageDialog(
+          context: context,
+          content: "The account already exists for that email.",
+          actionTitle: "Ok",
+          actionPress: () {
+            Navigator.of(context).pop();
+          },
+        );
+      }
+    } catch (e) {
       print("exeption: $e");
     }
   }
